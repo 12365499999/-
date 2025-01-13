@@ -1,18 +1,20 @@
 #include<iostream>
 #include<bits/stdc++.h>
 #include<windows.h>
-#include <algorithm>
+#include<algorithm>
 using namespace std;
 typedef int num,relateclass;
-typedef map<num,pair<float,relateclass> > relatelist; //Á´½Ó×ÖÁĞ±í£¬Á´½ÓÖµ£¬Á´½ÓÀàĞÍ£º-1Ç°£¬1ºó 
+typedef map<num,pair<float,relateclass> > relatelist; //é“¾æ¥å­—åˆ—è¡¨ï¼Œå…³è”åº¦ï¼Œé“¾æ¥ç±»å‹ï¼š-1å‰ï¼Œ1å 
 typedef vector<pair<num,pair<float,relateclass> > > singlelist;
 typedef pair<num,pair<float,relateclass> > psinglelist;
-map<num,relatelist> link; // ½¨Á¢Á´½Ó 
-map<string,num> voca; //²éÑ¯ĞÂ             ´Ê 
+typedef map<num,num> comprehlist;
+map<num,comprehlist> compreh;
+map<num,relatelist> link; // å»ºç«‹é“¾æ¥ 
+map<string,num> voca; //æŸ¥è¯¢æ–°             è¯ 
 map<num,string> revoca;
+map<num,bool> say;
 int N=0,times=0;
 bool cmp(const psinglelist a,const psinglelist b){
-	cout<<"cmp----"<<revoca[a.first]<<":"<<revoca[b.first]<<endl;
 	return abs(a.second.first)<=abs(b.second.first);
 }
 int isCN(string c,int i) {
@@ -21,17 +23,14 @@ int isCN(string c,int i) {
 void relatesort(int numm){
 //	for(int )
 }
-singlelist lenovo(int numm){  //Õ¹¿ªÁªÏë ÅÅĞò 
-//	int result[10]={0};
+singlelist lenovo(int numm){  //å±•å¼€è”æƒ³ æ’åº 
 	singlelist result;
 	for(relatelist::iterator i=link[numm].begin();i!=link[numm].end();i++){
+		if(i->first==numm)
+		    continue;
 		result.push_back(*i);
 	}
-//	cout<<"LISTnumber::"<<revoca[numm]<<"==="<<link[numm].end()-link[numm].begin()<<endl;
 	sort(result.begin(),result.end(),cmp);
-//	for(int i=0,j=0;i<5;i++,j++){
-//		result[i]=a[j].first;
-//	}
 	return result;
 }
 void forget(){
@@ -45,7 +44,7 @@ void checklist(int slr[],int sum){
 	for(int i=0;i<sum;i++){
 		singlelist result=lenovo(slr[i]);
 		cout<<revoca[slr[i]]<<"---FINDING\n";
-		for(int j=0;j<10;j++){
+		for(int j=0;j<result.size()&&j<10;j++){
 			cout<<"linking"<<j<<":"<<revoca[result[j].first]<<"__times="<<link[slr[i]][result[j].first].first<<" class:"<<link[slr[i]][result[j].first].second<<endl;
 		}
 //		delete[] result;
@@ -54,29 +53,81 @@ void checklist(int slr[],int sum){
 void checkword(int slr[],int sum){
 	for(int i=0;i<sum;i++){
 		singlelist result=lenovo(slr[i]);
-		if(link[slr[i]][result[1].first].second==-1){
-			cout<<revoca[result[1].first]<<revoca[slr[i]]<<" ";
+		if(link[slr[i]][result[0].first].second==-1){
+			cout<<revoca[result[0].first]<<revoca[slr[i]]<<" ";
 		}else {
-		    cout<<revoca[slr[i]]<<revoca[result[1].first]<<" ";
+		    cout<<revoca[slr[i]]<<revoca[result[0].first]<<" ";
 		}
 //		delete[] result;
 	} 
 }
+bool cmp2(int a,int b){
+	return link[a][a].first>link[b][b].first;
+}
+void learn(int numm){
+	
+}
+void checkkey(int slr[],int sum){
+	int keylen=sum/5+1;
+	int keys[keylen]={0};
+	sort(slr,slr+sum,cmp2);
+	cout<<endl<<"THE Keys:";
+	for(int i=0;i<keylen;i++){
+		keys[i]=slr[i];
+		cout<<revoca[keys[i]]<<" ";
+	}
+	cout<<endl;
+}
+void formerchain(int numm){
+	if(say[numm]){
+		return;
+	}
+	say[numm]=1;
+	singlelist result=lenovo(numm);
+	for(int i=0;i<result.size();i++){
+	    if(result[i].second.second==-1){
+	        formerchain(result[i].first);
+	        break;
+	    }
+	}
+	cout<<revoca[numm];
+}
+void followchain(int numm){
+	if(say[numm]){
+		return;
+	}
+	say[numm]=1;
+	cout<<revoca[numm];
+	singlelist result=lenovo(numm);
+	for(int i=0;i<result.size();i++){
+	    if(result[i].second.second==1){
+	        followchain(result[i].first);
+	        break;
+	    }
+	}
+}
+void checkchain(int slr[],int sum){
+	for(int i=0;i<sum;i++){
+		formerchain(slr[i]);
+		say.clear();
+		followchain(slr[i]);
+		say.clear();
+		cout<<endl;
+	}
+}
+void randomlenovo();
 main(){
 	while(1){
 	times++;
 	string str;
-	cin>>str;//Ìı»° 
-	int *slr=new int[6000],sum=0;//¶ÌÊ±¼ÇÒä£¬´Ê»ãÊı 
+	cin>>str;//å¬è¯ 
+	int *slr=new int[6000],sum=0;//çŸ­æ—¶è®°å¿†ï¼Œè¯æ±‡æ•° 
 	for(int i=0;i<str.size();){
 		int len=isCN(str,i);
 		string singleChar = str.substr(i, len);
-//		cout<<"reading:"<<singleChar;//»®×Ö 
 		if(voca.find(singleChar)!=voca.end()){
-//			cout<<" YES!!!\n";
 		}
-		else {//³õÊ¼»¯ 
-//			cout<<" NO....\n";
+		else {//åˆå§‹åŒ– 
 			voca[singleChar]=N;
 			revoca[N]=singleChar;
 			relatelist infi;
@@ -91,15 +142,17 @@ main(){
 	for(int i=0;i<sum;i++){
 		//link[slr[i]]
 		for(int j=0;j<sum;j++){
-			link[slr[i]][slr[j]].first+=-(i-j)*(i-j)*(i-j);//¼ÆËã¹ØÁª 
+			link[slr[i]][slr[j]].first+=-(i-j)*(i-j)*(i-j);//è®¡ç®—å…³è” 
 			link[slr[i]][slr[j]].second=link[slr[i]][slr[j]].first<=0?-1:1;
-//			cout<<"INFINITING:"<<revoca[slr[i]]<<"&"<<revoca[slr[j]]<<endl;
+			link[slr[i]][slr[i]].first++;
 		}
 	}
-	cout<<"N==="<<N<<endl<<"T==="<<times<<endl;//×Ü´Ê»ãÍ³¼Æ 
-	checklist(slr,sum);
-	//Êä³ö
+	cout<<"N==="<<N<<endl<<"T==="<<times<<endl;//æ€»è¯æ±‡ç»Ÿè®¡ 
+	//è¾“å‡º
+//	checklist(slr,sum);
 //	checkword(slr,sum);
+//	checkkey(slr,sum); 
+	checkchain(slr,sum);
 	forget();
 	cout<<endl;
 	delete[] slr;
